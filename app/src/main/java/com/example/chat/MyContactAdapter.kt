@@ -1,0 +1,76 @@
+package com.example.chat
+
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import android.content.Context
+import android.content.res.Resources
+import android.graphics.Color
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
+import com.example.chat.ContactFragmentSearchAdd
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+
+
+class MyContactAdapter : RecyclerView.Adapter<MyContactAdapter.MyViewHolder> {
+
+    private val contacts: Array<Contact>
+    var context: Context
+
+    constructor(context: Context, contacts:  Array<Contact>) : super() {
+        this.context = context
+        this.contacts = contacts
+    }
+
+    class MyViewHolder : RecyclerView.ViewHolder {
+
+      var nickName : TextView
+      var email : TextView
+      var firstLetter : TextView
+
+
+        constructor(view: View) : super(view) {
+            nickName = view.findViewById(R.id.textViewNickName)
+            email = view.findViewById(R.id.textViewEmail)
+            firstLetter = view.findViewById(R.id.textViewFirstLetter)
+
+
+        }
+
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+        val inflater : LayoutInflater = LayoutInflater.from(context)
+        val view : View = inflater.inflate(R.layout.my_contact_row, parent, false)
+        return MyViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        val currentContact: Contact = contacts[position]
+
+        val currentNickname = currentContact.nickname
+        val currentEmail = currentContact.email
+        val currentFirstLetter = currentNickname.first()
+
+        holder.firstLetter.text = "J"
+        holder.nickName.text = currentNickname
+        holder.email.text = currentEmail
+
+        // alternate cards background color
+        if (position % 2 == 1) {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.white))
+        } else {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.grayTint))
+        }
+    }
+
+
+
+
+
+    override fun getItemCount(): Int {
+        return contacts.size
+    }
+}
