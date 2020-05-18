@@ -4,20 +4,25 @@ package com.example.chat
 import android.content.Context
 import android.graphics.Rect
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
+import android.view.*
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.example.chat.MyContactAdapter
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+
 
 /**
  * A simple [Fragment] subclass.
@@ -27,74 +32,98 @@ class ContactFragmentSearchAdd : Fragment() {
     lateinit var buttonSearch: FloatingActionButton
     lateinit var recyclerView: RecyclerView
     lateinit var myContactAdapter: MyContactAdapter
-    lateinit var linearLayoutManager : LinearLayoutManager
+    lateinit var linearLayoutManager: LinearLayoutManager
+
+    lateinit var fireBaseAuth: FirebaseAuth
+    private lateinit var database: DatabaseReference
+
+    lateinit var searchField: EditText
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
-        val view: View = inflater.inflate(R.layout.fragment_contact_search_add,
+        val view: View = inflater.inflate(
+            R.layout.fragment_contact_search_add,
             container,
             false
         )
 
+        searchField = view.findViewById(R.id.searchField)
+
         buttonSearch = view.findViewById(R.id.buttonSearch)
+//        textViewUserEmail = view.findViewById(R.id.textViewUserEmail)
+//        textViewNickname = view.findViewById(R.id.textViewNickName)
 
         recyclerView = view.findViewById(R.id.myContactList)
+//        viewTextUserEmail = view.findViewById(R.id.textViewUserEmail)
 
-        var results : Array<Contact>
+        var results: Array<Contact>
         val context: Context = view.context
 
+        database = Firebase.database.reference
+        fireBaseAuth = FirebaseAuth.getInstance()
+        val fireBaseUser = fireBaseAuth.currentUser
+        var dataResults = mutableListOf<Contact>()
 
-        fun displayResult(){
+        fun searchContacts() {
 
-            val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-            val randomString1 = (1..10)
-                .map { i -> kotlin.random.Random.nextInt(0, charPool.size) }
-                .map(charPool::get)
-                .joinToString("")
+            val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
-            val randomString2 = (1..10)
-                .map { i -> kotlin.random.Random.nextInt(0, charPool.size) }
-                .map(charPool::get)
-                .joinToString("")
+            val searchTerm = searchField.text.toString().trim().toLowerCase()
 
-            results = arrayOf(
-                Contact(randomString1, "fake1@resutls.com"),
-                Contact(randomString2, "fake2@results.com")
-            )
-            myContactAdapter = MyContactAdapter(context, results)
-            recyclerView.adapter = myContactAdapter
-            linearLayoutManager = LinearLayoutManager(context)
-            recyclerView.layoutManager = linearLayoutManager
+            val contactsListener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val unfilteredDataResults = mutableListOf<Contact>()
+                    unfilteredDataResults.clear()
+                    dataResults.clear()
+                    dataSnapshot.children.mapNotNullTo(unfilteredDataResults) {
+                        it.getValue<Contact>(Contact::class.java)
+                    }
 
+                    val filteredDataResults = unfilteredDataResults.filter {
+                        it.email.toLowerCase().contains(searchTerm) ||
+                            it.nickname.toLowerCase().contains(searchTerm)
+                    }
+
+
+                    Log.i("result: ", "")
+                    val iterator = filteredDataResults.listIterator()
+                    while (iterator.hasNext()) {
+                        val currentContact = iterator.next()
+                        dataResults.add(currentContact)
+                    }
+                    myContactAdapter = MyContactAdapter(context, dataResults.toTypedArray())
+                    recyclerView.adapter = myContactAdapter
+                    linearLayoutManager = LinearLayoutManager(context)
+                    recyclerView.layoutManager = linearLayoutManager
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.w(
+                        "FIREBASE",
+                        "Loading user last name cancelled",
+                        databaseError.toException()
+                    )
+                }
+            }
+
+            database.child("users").addValueEventListener(contactsListener)
         }
 
-//        fun setVisibility( isVisible : Boolean){
-//
-//            lateinit var param : RecyclerView.LayoutParams
-//            param =
-//
-//
-//            if (isVisible){
-//                param.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-//                param.width = LinearLayout.LayoutParams.MATCH_PARENT;
-//                itemView.setVisibility(View.VISIBLE);
-//            }else{
-//                itemView.setVisibility(View.GONE);
-//                param.height = 0;
-//                param.width = 0;
+//        searchField.setOnEditorActionListener { v, actionId, event ->
+//            if(actionId == EditorInfo.IME_ACTION_SEARCH){
+//                searchContacts()
+//                true
+//            } else {
+//                false
 //            }
-//            itemView.setLayoutParams(param);
 //        }
 
-
-
-
-
-        buttonSearch.setOnClickListener{
-            displayResult()
+        buttonSearch.setOnClickListener {
+            searchContacts()
         }
 
 

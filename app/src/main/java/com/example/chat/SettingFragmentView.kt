@@ -44,15 +44,17 @@ class SettingFragmentView : Fragment(), View.OnClickListener {
     ): View? {
         val view: View = inflater.inflate(R.layout.fragment_setting_view, container, false)
 
-        database = Firebase.database.reference
-        fireBaseAuth = FirebaseAuth.getInstance()
-        val fireBaseUser = fireBaseAuth.currentUser
 
         buttonEdit = view.findViewById(R.id.buttonEdit)
         buttonEdit.setOnClickListener(this)
 
         buttonLogout = view.findViewById(R.id.buttonLogOut)
         buttonLogout.setOnClickListener(this)
+
+
+        database = Firebase.database.reference
+        fireBaseAuth = FirebaseAuth.getInstance()
+        val fireBaseUser = fireBaseAuth.currentUser
 
         if (fireBaseAuth.currentUser == null) {
 

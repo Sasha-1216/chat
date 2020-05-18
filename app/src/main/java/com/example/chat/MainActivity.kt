@@ -18,6 +18,12 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_main.*
 
+
+fun View.hideKeyboard() {
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(windowToken, 0)
+}
+
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     lateinit var fireBaseAuth: FirebaseAuth
@@ -90,6 +96,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                             .child("nickname").setValue(nickname)
                         database.child("users").child(fireBaseUser?.uid.toString())
                             .child("email").setValue(email)
+                        database.child("users").child(fireBaseUser?.uid.toString())
+                            .child("uid").setValue(fireBaseUser?.uid.toString())
                     }
 
 

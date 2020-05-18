@@ -1,19 +1,35 @@
 package com.example.chat
 
-import com.google.firebase.database.Exclude
-import com.google.firebase.database.IgnoreExtraProperties
+//@IgnoreExtraProperties
+//data class UserInformation (
+//
+//     var nickName : String? = "",
+//     var lastName : String? = ""
+//) {
+//     @Exclude
+//     fun toMap(): Map<String, Any?> {
+//          return mapOf(
+//               "firstName" to firstName,
+//               "lastName" to lastName
+//          )
+//     }
+//}
 
-@IgnoreExtraProperties
-data class UserInformation (
+ class Message {
+     var message: String? = null
+     var sender: User? = null
+     var createdAt: Long = 0
+}
 
-     var firstName : String? = "",
-     var lastName : String? = ""
-) {
-     @Exclude
-     fun toMap(): Map<String, Any?> {
-          return mapOf(
-               "firstName" to firstName,
-               "lastName" to lastName
-          )
+class User  {
+     var nickName: String? = null
+
+     init {
+          this.nickName = nickName
      }
 }
+
+
+
+
+
