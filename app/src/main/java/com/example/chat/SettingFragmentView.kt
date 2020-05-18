@@ -3,16 +3,13 @@ package com.example.chat
 
 import android.content.Intent
 import android.os.Bundle
-import android.renderscript.Sampler
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -20,7 +17,6 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.android.synthetic.main.fragment_setting_view.*
 
 /**
  * A simple [Fragment] subclass.
@@ -31,10 +27,8 @@ class SettingFragmentView : Fragment(), View.OnClickListener {
     lateinit var fireBaseAuth: FirebaseAuth
     lateinit var viewTextUserEmail: TextView
     private lateinit var database: DatabaseReference
-
-    lateinit var textViewUserEmail: TextView
     lateinit var textViewNickname: TextView
-
+    lateinit var textViewFirstLetter: TextView
     lateinit var buttonEdit: Button
     lateinit var buttonLogout: Button
 
@@ -51,6 +45,7 @@ class SettingFragmentView : Fragment(), View.OnClickListener {
         buttonLogout = view.findViewById(R.id.buttonLogOut)
         buttonLogout.setOnClickListener(this)
 
+        textViewFirstLetter = view.findViewById(R.id.textViewFirstLetter)
 
         database = Firebase.database.reference
         fireBaseAuth = FirebaseAuth.getInstance()
@@ -72,6 +67,8 @@ class SettingFragmentView : Fragment(), View.OnClickListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val nickname = dataSnapshot.value
                 textViewNickname.text = nickname.toString()
+                val nicknameFirstLetter = nickname.toString().first().toString()
+                textViewFirstLetter.text = nicknameFirstLetter
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -79,7 +76,8 @@ class SettingFragmentView : Fragment(), View.OnClickListener {
             }
         }
 
-        database.child("users").child(fireBaseUser?.uid as String).child("nickname").addListenerForSingleValueEvent(nicknameListener)
+        database.child("users").child(fireBaseUser?.uid as String).child("nickname")
+            .addListenerForSingleValueEvent(nicknameListener)
 
         return view
     }

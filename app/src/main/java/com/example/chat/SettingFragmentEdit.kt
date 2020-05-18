@@ -35,6 +35,7 @@ class SettingFragmentEdit : Fragment() {
     lateinit var viewTextUserEmail: TextView
     lateinit var editTextNickname: EditText
     lateinit var buttonSave: Button
+    lateinit var textViewFirstLetter: TextView
 
 
 
@@ -61,18 +62,21 @@ class SettingFragmentEdit : Fragment() {
         viewTextUserEmail.text = fireBaseUser?.email
 
         editTextNickname = view.findViewById(R.id.editTextNickname)
+        textViewFirstLetter = view.findViewById(R.id.textViewFirstLetter)
 
         val nicknameListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val nickname = dataSnapshot.value
                 editTextNickname.hint = nickname.toString()
+                val nicknameFirstLetter = nickname.toString().first().toString()
+                textViewFirstLetter.text = nicknameFirstLetter
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
                 Log.w("FIREBASE", "Loading user last name cancelled", databaseError.toException())
             }
         }
-        
+
         database.child("users").child(fireBaseUser?.uid as String).child("nickname").addListenerForSingleValueEvent(nicknameListener)
 
 
